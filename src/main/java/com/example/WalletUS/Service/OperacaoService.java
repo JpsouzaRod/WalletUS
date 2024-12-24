@@ -3,6 +3,7 @@ package com.example.WalletUS.Service;
 import com.example.WalletUS.Model.Conta;
 import com.example.WalletUS.Model.Enum.EnumMoeda;
 import com.example.WalletUS.Repository.ContaRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +17,7 @@ public class OperacaoService{
     @Autowired
     private ConversorMoeda conversorMoeda;
 
-
+    @Transactional
     public Conta depositarReal(Long numeroConta, float valorReal) {
         try{
             Conta conta = contaRepository.findById(numeroConta)
@@ -32,6 +33,7 @@ public class OperacaoService{
         }
     }
 
+    @Transactional
     public Conta sacarReal(Long numeroConta, float valorRealSacado) {
         try{
             Conta conta = contaRepository.findById(numeroConta)
@@ -51,15 +53,16 @@ public class OperacaoService{
         }
     }
 
+
+    @Transactional
     public Conta comprarDolar(Long numeroConta, float valorDolar) {
-        try{
+        try {
             Conta conta = contaRepository.findById(numeroConta)
-                    .orElseThrow(()-> new IllegalArgumentException("Conta não encontrada"));
+                    .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada"));
 
             float valorRealDescontado = conversorMoeda.ConverterDolarparaReal(valorDolar);
 
-            if (conta.getSaldoMoedaReal() < valorRealDescontado)
-            {
+            if (conta.getSaldoMoedaReal() < valorRealDescontado) {
                 throw new IllegalArgumentException("Saldo insuficiente finalizar transação");
             }
 
@@ -76,11 +79,15 @@ public class OperacaoService{
         }
     }
 
+    @Transactional
     public Conta venderDolar(Long numeroConta, float valorDolar) {
         try{
             Conta conta = contaRepository.findById(numeroConta)
                     .orElseThrow(()-> new IllegalArgumentException("Conta não encontrada"));
 
+            if (conta.getSaldoMoedaDolar() < valorDolar) {
+                throw new IllegalArgumentException("Saldo insuficiente finalizar transação");
+            }
             float valorRealConvertido = conversorMoeda.ConverterDolarparaReal(valorDolar);
 
             conta.creditarValorReal(valorRealConvertido);

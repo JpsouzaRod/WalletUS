@@ -13,8 +13,11 @@ public class ContaService {
     private TransacaoService transacaoService;
 
     public Conta criarConta(Conta conta) {
-        return contaRepository.save(conta);
-
+        try{
+            return contaRepository.save(conta);
+        }catch(Exception e){
+            throw new IllegalArgumentException("Não foi possivel finalizar essa operação");
+        }
     }
 
     public Conta consultarConta(Long numeroConta) {
